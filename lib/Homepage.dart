@@ -79,23 +79,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(child:
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
-            // child: TextField(
-            //   controller: _controller,
-            //   decoration: InputDecoration(
-            //     hintText: 'Add a new todo items',
-            //     filled: true,
-            //     fillColor: Colors.deepPurple.shade200,
-            //     enabledBorder: UnderlineInputBorder(
-            //       borderSide: BorderSide(color: Colors.white),
-            //       borderRadius: BorderRadius.circular(15),
-            //     ),
-            //
-            //     focusedBorder: UnderlineInputBorder(
-            //       borderSide: BorderSide(color: Colors.deepPurple),
-            //       borderRadius: BorderRadius.circular(15),
-            //     ),
-            //   ),
-            // ),
+
           )
     ),
           FloatingActionButton(
@@ -118,7 +102,7 @@ class _HomePageState extends State<HomePage> {
         taskCompleted: db.toDoList[index][1],
 
         onChanged: (value) => checkBoxChanged(index),
-        deleteFunction: (context) => deleteTask,
+        deleteFunction: (context) => deleteTask(index),
 
       );
     }), );
