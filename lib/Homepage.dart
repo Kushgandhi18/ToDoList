@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/data/database.dart';
+import 'package:todo_list/utils/dialog_box.dart';
 import 'package:todo_list/utils/todo_List.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,39 +13,64 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  final _mybox= Hive.box('mybox');
   final _controller = TextEditingController();
-  List toDoList=[
-    ['WakeUp at 6am',false],
-    ['Drink Coffee',false],
-    ['Read books',false],
-    ['Sleep',true]
-  ];
+
+  ToDoDatabase db= ToDoDatabase();
+
+  void initState(){
+
+    if(_mybox.get("TODOLIST")== null){
+      db.createInitialData();
+    }else{
+      db.loadData();
+    }
+
+    super.initState();
+  }
 
   void checkBoxChanged(int index){
    setState(() {
-     toDoList[index][1]= !toDoList[index][1];
+     db.toDoList[index][1]= !db.toDoList[index][1];
    });
+   db.updateDataBase();
   }
 
   void saveNewTask(){
     setState(() {
-      toDoList.add([_controller.text,false],);
+      db.toDoList.add([_controller.text,false]);
       _controller.clear();
+
     });
+    Navigator.of(context).pop();
+  }
+
+  void createNewTask(){
+    showDialog(context: context, builder: (context){
+      return DialogBox(
+        controller: _controller,
+        onSave: saveNewTask ,
+        onCancel: () => Navigator.of(context).pop(),);
+      },
+    );
   }
 
   void deleteTask(int index){
     setState(() {
-      toDoList.remove(index);
+      db.toDoList.removeAt(index);
+
     });
+    db.updateDataBase();
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(child: Scaffold(
       backgroundColor: Colors.blue.shade300,
       appBar: AppBar(title: Text(
-          'ToDo List',),
-      backgroundColor: Colors.deepPurpleAccent,
+          'ToDo List',
+      textAlign: TextAlign.center,),
+      backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
       ),
       body: Body(),
@@ -51,27 +79,27 @@ class _HomePageState extends State<HomePage> {
           Expanded(child:
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Add a new todo items',
-                filled: true,
-                fillColor: Colors.deepPurple.shade200,
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepPurple),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
+            // child: TextField(
+            //   controller: _controller,
+            //   decoration: InputDecoration(
+            //     hintText: 'Add a new todo items',
+            //     filled: true,
+            //     fillColor: Colors.deepPurple.shade200,
+            //     enabledBorder: UnderlineInputBorder(
+            //       borderSide: BorderSide(color: Colors.white),
+            //       borderRadius: BorderRadius.circular(15),
+            //     ),
+            //
+            //     focusedBorder: UnderlineInputBorder(
+            //       borderSide: BorderSide(color: Colors.deepPurple),
+            //       borderRadius: BorderRadius.circular(15),
+            //     ),
+            //   ),
+            // ),
           )
     ),
           FloatingActionButton(
-            onPressed: saveNewTask,
+            onPressed: createNewTask,
             child: Icon(Icons.add),
 
           ),
@@ -84,13 +112,13 @@ class _HomePageState extends State<HomePage> {
   Widget Body(){
     return Container(
       child: ListView.builder(
-          itemCount: toDoList.length,itemBuilder: (BuildContext context,index){
+          itemCount: db.toDoList.length,itemBuilder: (BuildContext context,index){
       return ToDoList(
-        taskName: toDoList[index][0],
-        taskCompleted: toDoList[index][1],
+        taskName: db.toDoList[index][0],
+        taskCompleted: db.toDoList[index][1],
 
         onChanged: (value) => checkBoxChanged(index),
-        deleteFunction: (value)=> deleteTask(index),
+        deleteFunction: (context) => deleteTask,
 
       );
     }), );

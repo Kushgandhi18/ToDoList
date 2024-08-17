@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:todo_list/Homepage.dart';
 
-void main() {
+void main() async {
+
+  await Hive.initFlutter();
+
+  var box = await Hive.openBox('mybox');
+
   runApp(const MyApp());
 }
 
@@ -18,6 +24,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: HomePage(),
+      darkTheme : ThemeData(primarySwatch: Colors.blue),
     );
   }
 }
